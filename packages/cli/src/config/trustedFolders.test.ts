@@ -71,8 +71,14 @@ describe('Trusted Folders', () => {
 
       // Start two concurrent calls
       // These will race to acquire the lock on the real file system
-      const p1 = loadedFolders.setValue('/path1', TrustLevel.TRUST_FOLDER);
-      const p2 = loadedFolders.setValue('/path2', TrustLevel.TRUST_FOLDER);
+      const p1 = loadedFolders.setValue(
+        path.resolve('/path1'),
+        TrustLevel.TRUST_FOLDER,
+      );
+      const p2 = loadedFolders.setValue(
+        path.resolve('/path2'),
+        TrustLevel.TRUST_FOLDER,
+      );
 
       await Promise.all([p1, p2]);
 
@@ -81,8 +87,8 @@ describe('Trusted Folders', () => {
       const config = JSON.parse(content);
 
       expect(config).toEqual({
-        '/path1': TrustLevel.TRUST_FOLDER,
-        '/path2': TrustLevel.TRUST_FOLDER,
+        [path.resolve('/path1')]: TrustLevel.TRUST_FOLDER,
+        [path.resolve('/path2')]: TrustLevel.TRUST_FOLDER,
       });
     });
   });
@@ -96,13 +102,16 @@ describe('Trusted Folders', () => {
 
     it('should load rules from the configuration file', () => {
       const config = {
-        '/user/folder': TrustLevel.TRUST_FOLDER,
+        [path.resolve('/user/folder')]: TrustLevel.TRUST_FOLDER,
       };
       fs.writeFileSync(trustedFoldersPath, JSON.stringify(config), 'utf-8');
 
       const { rules, errors } = loadTrustedFolders();
       expect(rules).toEqual([
-        { path: '/user/folder', trustLevel: TrustLevel.TRUST_FOLDER },
+        {
+          path: path.resolve('/user/folder'),
+          trustLevel: TrustLevel.TRUST_FOLDER,
+        },
       ]);
       expect(errors).toEqual([]);
     });
@@ -144,14 +153,14 @@ describe('Trusted Folders', () => {
       const content = `
         {
           // This is a comment
-          "/path": "TRUST_FOLDER"
+          "${path.resolve('/path').replaceAll('\\', '\\\\')}": "TRUST_FOLDER"
         }
       `;
       fs.writeFileSync(trustedFoldersPath, content, 'utf-8');
 
       const { rules, errors } = loadTrustedFolders();
       expect(rules).toEqual([
-        { path: '/path', trustLevel: TrustLevel.TRUST_FOLDER },
+        { path: path.resolve('/path'), trustLevel: TrustLevel.TRUST_FOLDER },
       ]);
       expect(errors).toEqual([]);
     });
@@ -217,15 +226,18 @@ describe('Trusted Folders', () => {
       fs.writeFileSync(trustedFoldersPath, '{}', 'utf-8');
       const loadedFolders = loadTrustedFolders();
 
-      await loadedFolders.setValue('/new/path', TrustLevel.TRUST_FOLDER);
+      await loadedFolders.setValue(
+        path.resolve('/new/path'),
+        TrustLevel.TRUST_FOLDER,
+      );
 
-      expect(loadedFolders.user.config['/new/path']).toBe(
+      expect(loadedFolders.user.config[path.resolve('/new/path')]).toBe(
         TrustLevel.TRUST_FOLDER,
       );
 
       const content = fs.readFileSync(trustedFoldersPath, 'utf-8');
       const config = JSON.parse(content);
-      expect(config['/new/path']).toBe(TrustLevel.TRUST_FOLDER);
+      expect(config[path.resolve('/new/path')]).toBe(TrustLevel.TRUST_FOLDER);
     });
 
     it('should throw FatalConfigError if there were load errors', async () => {

@@ -1420,6 +1420,7 @@ name = "yolo-checker"
         '.gemini',
         'trustedFolders.json',
       );
+      vi.stubEnv('GEMINI_CLI_TRUSTED_FOLDERS_PATH', trustedFoldersPath);
       vi.mocked(isWorkspaceTrusted).mockReturnValue({
         isTrusted: false,
         source: undefined,

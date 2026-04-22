@@ -391,7 +391,7 @@ describe('ToolConfirmationMessage', () => {
       newContent: 'b',
     };
 
-    it('should NOT show "Allow for all future sessions" when setting is false (default)', async () => {
+    it('should NOT show "Allow for all future sessions" when setting is false', async () => {
       const mockConfig = {
         isTrustedFolder: () => true,
         getIdeMode: () => false,
@@ -419,7 +419,7 @@ describe('ToolConfirmationMessage', () => {
       unmount();
     });
 
-    it('should show "Allow for all future sessions" when trusted', async () => {
+    it('should show "Allow for all future sessions" when trusted (default)', async () => {
       const mockConfig = {
         isTrustedFolder: () => true,
         getIdeMode: () => false,
@@ -436,11 +436,6 @@ describe('ToolConfirmationMessage', () => {
           terminalWidth={80}
           toolName="shell"
         />,
-        {
-          settings: createMockSettings({
-            security: { enablePermanentToolApproval: true },
-          }),
-        },
       );
 
       const output = lastFrame();
